@@ -1,0 +1,33 @@
+name: Deploy to Hugging Face Space
+
+on:
+  push:
+    branches: [ "main" ]   # Runs when you push to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config --global user.email "actions@hf.space"
+          git config --global user.name "HF-Deploy-Bot"
+
+          # Clone your space repo
+          git clone https://huggingface.co/ivyanshu-face:$HF_TOKEN@huggingface.co/spaces/ivyanshu-face/tds-project-2
+
+          # Copy all files from GitHub repo to space folder
+          rsync -av --exclude='.git' . space/
+
+          cd space
+
+          # Commit and push changes
+          git add .
+          git commit -m "Deploy from GitHub Actions 🚀" || echo "No changes to commit"
+          git push
